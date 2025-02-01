@@ -80,5 +80,20 @@ router.get("/", async (req, res) => {
     res.status(500).json({ message: "Error fetching orders", error });
   }
 });
+router.get("/feature-options", async (req, res) => {
+  try {
+    const productNames = await Order.distinct("product_name");
+    const categories = await Order.distinct("category");
+    const ages = await Order.distinct("age");
 
+    res.status(200).json({
+      product_name: productNames,
+      category: categories,
+      age: ages,
+    });
+  } catch (error) {
+    console.error("Error fetching feature options:", error);
+    res.status(500).json({ message: "Error fetching feature options", error });
+  }
+});
 module.exports = router;

@@ -49,6 +49,8 @@ const errorHandler = require('./middleware/util/errorHandler');
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
 const reviewAnalysisRoutes = require("./routes/reviewAnalysisRoutes");
+const mlRoutes = require("./routes/mlRoutes");
+const mallRoutes= require("./routes/mallRoutes");
 
 
 
@@ -75,7 +77,8 @@ app.use('/api/suppliers', supplierRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/logistics', logisticsRoutes);
 app.use("/api/review-analysis", reviewAnalysisRoutes);
-
+app.use("/api/ml", mlRoutes);
+app.use("/api/malls", mallRoutes);
 app.use('/api', emailRoutes);
 // Health Check Route
 app.get("/", (req, res) => {
