@@ -1,225 +1,130 @@
-import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  BarElement,
+  Tooltip,
+  Legend,
+  CategoryScale,
+  LinearScale,
+} from "chart.js";
+import { Bar, Pie } from "react-chartjs-2";
 
-const Suppliers = () => {
-  const [suppliers, setSuppliers] = useState([]);
+// Register Chart.js components
+ChartJS.register(ArcElement, BarElement, Tooltip, Legend, CategoryScale, LinearScale);
+
+const ReviewAnalysis = () => {
+  const [categoryData, setCategoryData] = useState([]);
+  const [productData, setProductData] = useState([]);
+  const [recommendations, setRecommendations] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [showForm, setShowForm] = useState(false);
-  const [selectedSupplier, setSelectedSupplier] = useState(null);
-  const [quantity, setQuantity] = useState('');
-  const [shipmentPort, setShipmentPort] = useState('');
-
-  const location = useLocation();
-  const { productName } = location.state || {};  // Get productName from Inventory page
 
   useEffect(() => {
-    const fetchSuppliers = async () => {
+    const fetchAggregatedReviews = async () => {
       try {
-        const response = await axios.get('https://supplychain-hyeo-apurvas-projects-a5f1cbec.vercel.app/api/suppliers');
-        setSuppliers(response.data);
+        const response = await axios.get("http://localhost:5050/api/review-analysis/aggregated-reviews");
+        setCategoryData(response.data.categoryData);
+        setProductData(response.data.productData);
+        setRecommendations(response.data.recommendations);
         setLoading(false);
-      } catch (err) {
-        setError('Error fetching suppliers');
+      } catch (error) {
+        console.error("Error fetching aggregated reviews:", error);
         setLoading(false);
       }
     };
-    fetchSuppliers();
+
+    fetchAggregatedReviews();
   }, []);
 
-  const handleSendEmail = async (e) => {
-    e.preventDefault();
-    try {
-      await axios.post('https://supplychain-hyeo-apurvas-projects-a5f1cbec.vercel.app/api/send-email', {
-        supplierEmail: selectedSupplier.email,
-        productName,
-        quantity,
-        shipmentPort,
-      });
-      alert(`Email sent to ${selectedSupplier.name} for product ${productName}`);
-      setQuantity('');
-      setShipmentPort('');
-      setShowForm(false);
-    } catch (err) {
-      setError('Error sending email');
-    }
-  };
+  if (loading) return <p>Loading...</p>;
 
-  if (loading) return <p>Loading suppliers...</p>;
-  if (error) return <p>{error}</p>;
+  // Prepare data for graphs
+  const categoryNames = categoryData.map((item) => item._id);
+  const categoryAvgReviews = categoryData.map((item) => item.avgReview);
+  const categoryTotalReviews = categoryData.map((item) => item.totalReviews);
+
+  const productNames = productData.map((item) => item._id);
+  const productAvgReviews = productData.map((item) => item.avgReview);
+  const productTotalReviews = productData.map((item) => item.totalReviews);
 
   return (
-    <div style={containerStyle}>
-      {productName && (
-        <div className="popup-message" style={popupMessageStyle}>
-          <p>Choose your supplier to reorder {productName}</p>
-        </div>
-      )}
+    <div style={{ padding: "20px" }}>
+      <h1>Review Analysis</h1>
 
-      <div style={tableContainerStyle}>
-        <table style={tableStyle}>
-          <thead>
-            <tr>
-              <th>Supplier ID</th>
-              <th>Name</th>
-              <th>Category</th>
-              <th>Performance</th>
-              <th>Email</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {suppliers.map((supplier) => (
-              <tr key={supplier._id} style={{ borderBottom: '1px solid #ddd' }}>
-                <td>{supplier.supplier_id}</td>
-                <td>{supplier.name}</td>
-                <td>{supplier.category}</td>
-                <td>{supplier.performance}</td>
-                <td>{supplier.email}</td>
-                <td>
-                  <button 
-                    onClick={() => { setSelectedSupplier(supplier); setShowForm(true); }}
-                    style={buttonStyle}
-                  >
-                    Send Email
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      {/* Category vs Average Reviews */}
+      <div style={{ marginBottom: "40px" }}>
+        <h2>Category vs Average Reviews</h2>
+        <Bar
+          data={{
+            labels: categoryNames,
+            datasets: [
+              {
+                label: "Average Review",
+                data: categoryAvgReviews,
+                backgroundColor: "rgba(75, 192, 192, 0.6)",
+              },
+            ],
+          }}
+        />
+        <p>Best Category: {recommendations.bestCategory._id} with average review {recommendations.bestCategory.avgReview.toFixed(2)}</p>
+        <p>Worst Category: {recommendations.worstCategory._id} with average review {recommendations.worstCategory.avgReview.toFixed(2)}</p>
       </div>
 
-      {showForm && (
-        <form onSubmit={handleSendEmail} style={formStyle}>
-          <h3 style={formTitleStyle}>Send Email to {selectedSupplier.name}</h3>
-          <div style={inputContainerStyle}>
-            <label style={labelStyle}>Product Name: </label>
-            <input type="text" value={productName} disabled style={inputStyle} />
-          </div>
-          <div style={inputContainerStyle}>
-            <label style={labelStyle}>Quantity: </label>
-            <input
-              type="number"
-              value={quantity}
-              onChange={(e) => setQuantity(e.target.value)}
-              required
-              style={inputStyle}
-            />
-          </div>
-          <div style={inputContainerStyle}>
-            <label style={labelStyle}>Shipment Plant: </label>
-            <select
-              value={shipmentPort}
-              onChange={(e) => setShipmentPort(e.target.value)}
-              required
-              style={inputStyle}
-            >
-              <option value="">Select a shipment port</option>
-              <option value="New York">New York</option>
-              <option value="Los Angeles">Los Angeles</option>
-              <option value="Chicago">Chicago</option>
-              <option value="Houston">Houston</option>
-              <option value="Phoenix">Phoenix</option>
-            </select>
-          </div>
-          <button type="submit" style={submitButtonStyle}>Send Email</button>
-        </form>
-      )}
+      {/* Product vs Average Reviews */}
+      <div style={{ marginBottom: "40px" }}>
+        <h2>Product vs Average Reviews</h2>
+        <Bar
+          data={{
+            labels: productNames,
+            datasets: [
+              {
+                label: "Average Review",
+                data: productAvgReviews,
+                backgroundColor: "rgba(153, 102, 255, 0.6)",
+              },
+            ],
+          }}
+        />
+        <p>Best Product: {recommendations.bestProduct._id} with average review {recommendations.bestProduct.avgReview.toFixed(2)}</p>
+        <p>Worst Product: {recommendations.worstProduct._id} with average review {recommendations.worstProduct.avgReview.toFixed(2)}</p>
+      </div>
+
+      {/* Total Reviews vs Categories */}
+      <div style={{ marginBottom: "40px" }}>
+        <h2>Total Reviews vs Categories</h2>
+        <Pie
+          data={{
+            labels: categoryNames,
+            datasets: [
+              {
+                label: "Total Reviews",
+                data: categoryTotalReviews,
+                backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+              },
+            ],
+          }}
+        />
+      </div>
+
+      {/* Total Reviews vs Products */}
+      <div style={{ marginBottom: "40px" }}>
+        <h2>Total Reviews vs Products</h2>
+        <Pie
+          data={{
+            labels: productNames,
+            datasets: [
+              {
+                label: "Total Reviews",
+                data: productTotalReviews,
+                backgroundColor: ["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"],
+              },
+            ],
+          }}
+        />
+      </div>
     </div>
   );
 };
 
-// Responsive styles
-const containerStyle = {
-  padding: '20px',
-};
-
-const popupMessageStyle = {
-  marginBottom: '20px',
-  color: 'green',
-  fontWeight: 'bold',
-};
-
-const tableContainerStyle = {
-  width: '100%',
-  overflowX: 'auto',
-};
-
-const tableStyle = {
-  width: '100%',
-  borderCollapse: 'collapse',
-  minWidth: '600px',
-};
-
-const buttonStyle = {
-  padding: '5px 10px',
-  backgroundColor: '#89ff76',
-  color: 'black',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
-
-// Styles for the form
-const formStyle = {
-  marginTop: '20px',
-  padding: '20px',
-  backgroundColor: '#f9f9f9',
-  borderRadius: '8px',
-  border: '1px solid #ddd',
-  maxWidth: '100%',
-};
-
-const formTitleStyle = {
-  marginBottom: '20px',
-  fontSize: '18px',
-  fontWeight: 'bold',
-};
-
-const inputContainerStyle = {
-  marginBottom: '15px',
-};
-
-const labelStyle = {
-  display: 'inline-block',
-  width: '100%',
-  maxWidth: '150px',
-  fontWeight: 'bold',
-};
-
-const inputStyle = {
-  padding: '8px',
-  width: '100%',
-  borderRadius: '4px',
-  border: '1px solid #ccc',
-};
-
-const submitButtonStyle = {
-  padding: '10px 15px',
-  backgroundColor: '#89ff76',
-  color: 'black',
-  border: 'none',
-  borderRadius: '4px',
-  cursor: 'pointer',
-};
-
-// Media queries for responsiveness
-const mediaQueries = `
-  @media (max-width: 768px) {
-    ${tableStyle} {
-      min-width: 100%;
-    }
-    ${labelStyle} {
-      width: 100%;
-      margin-bottom: 5px;
-    }
-    ${inputContainerStyle} {
-      display: flex;
-      flex-direction: column;
-    }
-  }
-`;
-
-export default Suppliers;
+export default ReviewAnalysis;

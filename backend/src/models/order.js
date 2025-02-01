@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const orderSchema = new mongoose.Schema({
   invoice_no: { type: String, required: true },
@@ -13,8 +13,10 @@ const orderSchema = new mongoose.Schema({
   shopping_mall: { type: String, required: true },
   product_name: { type: String, required: true },
   review: { type: String, required: true },
+  review_rating: { type: Number, default: null }, // New column for rating
 });
 
-const Order = mongoose.models.Order || mongoose.model('Order', orderSchema, 'Order');
+// Prevent duplicate model creation in hot reload
+const Order = mongoose.models.Order || mongoose.model("Order", orderSchema, "Order");
 
 module.exports = Order;

@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const Order = require('../models/order');
+const Order = require('../models/Order');
 
 exports.getOrders = async (req, res) => {
   console.log('GET /orders endpoint hit'); // Debugging

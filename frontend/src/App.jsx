@@ -16,6 +16,8 @@ import Tables from './pages/Tables';
 
 import DefaultLayout from './layout/DefaultLayout';
 import Home from './pages/Home/Home1';
+import ReviewAnalysis from "../src/components/Tables/Suppliers";
+
 
 function App() {
   const [loading, setLoading] = useState(true);
@@ -116,6 +118,9 @@ function App() {
                   }
                 />
                 
+                <Route path="/review-analysis" element={<ReviewAnalysis />} />
+              
+
                 <Route
                   path="/auth/signin"
                   element={

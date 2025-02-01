@@ -48,6 +48,9 @@ const logisticsRoutes = require ('./routes/logisticsRoutes')
 const errorHandler = require('./middleware/util/errorHandler');
 const dotenv = require("dotenv");
 const connectDB = require("./config/db");
+const reviewAnalysisRoutes = require("./routes/reviewAnalysisRoutes");
+
+
 
 
 dotenv.config(); 
@@ -71,6 +74,7 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/suppliers', supplierRoutes);
 app.use('/api/inventory', inventoryRoutes);
 app.use('/api/logistics', logisticsRoutes);
+app.use("/api/review-analysis", reviewAnalysisRoutes);
 
 app.use('/api', emailRoutes);
 // Health Check Route

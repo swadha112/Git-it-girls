@@ -57,6 +57,7 @@
     "passport-jwt": "^4.0.1",
     "path": "^0.12.7",
     "react-customizable-progressbar": "^1.2.0",
+    "sentiment": "^5.0.2",
     "ts-node": "^10.9.1",
     "typescript": "^5.4.5",
     "xlsx": "^0.18.5"

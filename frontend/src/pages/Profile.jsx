@@ -6,7 +6,7 @@ import TableTwo from '../components/Tables/Suppliers.jsx';
 const Profile = () => {
   return (
     <>
-      <Breadcrumb pageName="Suppliers" />
+      <Breadcrumb pageName="Review Analysis" />
 
       <div className="flex flex-col gap-10">
         
