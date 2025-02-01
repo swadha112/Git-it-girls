@@ -1,16 +1,20 @@
 const mongoose = require('mongoose');
 
 const orderSchema = new mongoose.Schema({
-  order_id: { type: String, required: true, unique: true },
-  product: { type: String, required: true, enum: [
-    "cleanser", "toner", "sunscreen", "moisturizer", "face mask", "face cream", 
-    "lip oils", "lip balms", "hair serum", "hair shampoo", "hair conditioner", 
-    "hair oil", "body lotion", "body wash", "body exfoliator"] 
-  }, // Product should be one of these.
-  date: { type: String, required: true }, // Date as string
-  status: { type: String, required: true },
-  quantity: { type: Number, required: true }, // Added quantity
-  destination: { type: String, required: true }, // Kept destination
+  invoice_no: { type: String, required: true },
+  customer_id: { type: String, required: true },
+  gender: { type: String, required: true },
+  age: { type: Number, required: true },
+  category: { type: String, required: true },
+  quantity: { type: Number, required: true },
+  price: { type: Number, required: true },
+  payment_method: { type: String, required: true },
+  invoice_date: { type: String, required: true },
+  shopping_mall: { type: String, required: true },
+  product_name: { type: String, required: true },
+  review: { type: String, required: true },
 });
 
-module.exports = mongoose.model('Order', orderSchema, 'Orders');
+const Order = mongoose.models.Order || mongoose.model('Order', orderSchema, 'Order');
+
+module.exports = Order;

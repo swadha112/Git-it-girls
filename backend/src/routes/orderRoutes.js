@@ -10,17 +10,16 @@
 
 
 const express = require('express');
-const { getOrders, createOrder, updateOrderStatus } = require('../controllers/orderController');
-
 const router = express.Router();
+const { getOrders } = require('../controllers/orderController');
 
-// Route to get all orders
-router.get('/', getOrders);
+// Debugging statement to confirm route loading
+console.log('Order routes loaded.');
 
-// Route to create a new order
-router.post('/', createOrder);
-
-// Route to update order status
-router.put('/status', updateOrderStatus);
+// Route to fetch all orders
+router.get('/', (req, res, next) => {
+  console.log('Request received for /orders'); // Debugging incoming requests
+  next();
+}, getOrders);
 
 module.exports = router;
