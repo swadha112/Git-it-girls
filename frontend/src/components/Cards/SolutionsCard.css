@@ -1,0 +1,50 @@
+.solution-card {
+    background-color: white;
+    border-radius: 10px;
+    padding: 20px;
+    max-width: 100%; /* Allow full width on smaller screens */
+    text-align: center;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    margin:20px;
+    
+
+}
+
+.solution-card img {
+    width: 200px;
+    height: auto;
+    margin-bottom: 15px;
+    margin-left: 3.75em;
+    align-items: center;
+}
+
+.solution-card:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+.solution-card h2 {
+    color: yellowgreen;
+    font-size: 1.5em;
+    margin: 10px 0;
+}
+
+.solution-card p {
+    font-size: 1em;
+    color: #555;
+}
+
+/* Responsive Styling for Smaller Screens */
+@media (max-width: 768px) {
+    .solution-card {
+        padding: 15px;
+    }
+
+    .solution-card h2 {
+        font-size: 1.25em;
+    }
+
+    .solution-card p {
+        font-size: 0.95em;
+    }
+}
