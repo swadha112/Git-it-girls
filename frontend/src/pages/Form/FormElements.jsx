@@ -5,7 +5,7 @@ import TableThree from '../../components/Tables/Inventory.jsx';
 const FormElements = () => {
   return (
     <>
-      <Breadcrumb pageName="Inventory" />
+      <Breadcrumb pageName="Sales" />
 
       <div className="flex flex-col gap-10">
 
