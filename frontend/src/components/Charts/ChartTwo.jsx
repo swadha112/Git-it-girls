@@ -1,14 +1,14 @@
-import { useState, useEffect } from 'react';
-import ReactApexChart from 'react-apexcharts';
-import axios from 'axios';
+import { useState, useEffect } from "react";
+import ReactApexChart from "react-apexcharts";
+import axios from "axios";
 
 const options = {
-  colors: ['#3C50E0', '#89ff76', '#F1C40F', '#E74C3C'], // Add colors for each category
+  colors: ["#3C50E0", "#89ff76", "#F1C40F", "#E74C3C"], // Colors for categories
   chart: {
-    fontFamily: 'Satoshi, sans-serif',
-    type: 'bar',
-    height: 335,
-    stacked: true,
+    fontFamily: "Satoshi, sans-serif",
+    type: "bar",
+    height: 350,
+    stacked: true, // Enable stacked bar chart
     toolbar: {
       show: false,
     },
@@ -19,112 +19,92 @@ const options = {
   plotOptions: {
     bar: {
       horizontal: false,
-      borderRadius: 0,
-      columnWidth: '25%',
-      borderRadiusApplication: 'end',
-      borderRadiusWhenStacked: 'last',
+      columnWidth: "30%",
+      borderRadius: 3,
     },
   },
   dataLabels: {
     enabled: false,
   },
   xaxis: {
-    categories: [], // Will be dynamically set
+    categories: [], // Shopping mall names (dynamically updated)
   },
   legend: {
-    position: 'top',
-    horizontalAlign: 'left',
-    fontFamily: 'Satoshi',
+    position: "top",
+    horizontalAlign: "left",
+    fontFamily: "Satoshi",
     fontWeight: 500,
-    fontSize: '14px',
+    fontSize: "14px",
     markers: {
-      radius: 99,
+      radius: 12,
     },
   },
   fill: {
     opacity: 1,
   },
+  yaxis: {
+    title: {
+      text: "Total Quantity Sold",
+    },
+  },
 };
 
 const ChartTwo = () => {
   const [state, setState] = useState({
-    series: [
-      { name: 'Skin Care', data: [] },
-      { name: 'Lip Care', data: [] },
-      { name: 'Hair Care', data: [] },
-      { name: 'Body Care', data: [] },
-    ],
-    categories: [], // Plant names for X-axis
+    series: [],
+    categories: [], // Shopping mall names for X-axis
   });
+
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchOrdersData = async () => {
       try {
-        const response = await axios.get('https://supplychain-hyeo-apurvas-projects-a5f1cbec.vercel.app/api/inventory');
-        const inventory = response.data;
+        const response = await axios.get("http://localhost:5050/api/orders?all=true"); // Fetch all orders
+        const orders = response.data.orders;
 
-        // Extract plant names for the X-axis
-        const plantNames = inventory.map((plant) => plant.plant_name);
+        const mallsData = {}; // Object to store total quantity per mall per category
+        const uniqueCategories = new Set(); // To collect unique categories dynamically
 
-        // Initialize arrays to store stock levels for each category across plants
-        const skinCareStock = [];
-        const lipCareStock = [];
-        const hairCareStock = [];
-        const bodyCareStock = [];
+        // Aggregate order quantities by category and mall
+        orders.forEach((order) => {
+          const { shopping_mall, category, quantity } = order;
 
-        // Loop through each plant's products and sum the stock levels by category
-        inventory.forEach((plant) => {
-          let skinCareSum = 0;
-          let lipCareSum = 0;
-          let hairCareSum = 0;
-          let bodyCareSum = 0;
+          if (!mallsData[shopping_mall]) {
+            mallsData[shopping_mall] = {};
+          }
 
-          plant.products.forEach((product) => {
-            switch (product.category) {
-              case 'Skin Care':
-                skinCareSum += product.stock;
-                break;
-              case 'Lip Care':
-                lipCareSum += product.stock;
-                break;
-              case 'Hair Care':
-                hairCareSum += product.stock;
-                break;
-              case 'Body Care':
-                bodyCareSum += product.stock;
-                break;
-              default:
-                break;
-            }
-          });
+          if (!mallsData[shopping_mall][category]) {
+            mallsData[shopping_mall][category] = 0;
+          }
 
-          // Push the sums into their respective arrays
-          skinCareStock.push(skinCareSum);
-          lipCareStock.push(lipCareSum);
-          hairCareStock.push(hairCareSum);
-          bodyCareStock.push(bodyCareSum);
+          mallsData[shopping_mall][category] += quantity;
+          uniqueCategories.add(category); // Add category to unique set
         });
 
-        // Set the state with the formatted data
+        // Convert category set to an array
+        const categoryList = Array.from(uniqueCategories);
+
+        // Create series data dynamically based on available categories
+        const seriesData = categoryList.map((category) => ({
+          name: category,
+          data: Object.keys(mallsData).map((mall) => mallsData[mall][category] || 0), // Use 0 if category not present in mall
+        }));
+
+        // Update the chart state with new data
         setState({
-          series: [
-            { name: 'Skin Care', data: skinCareStock },
-            { name: 'Lip Care', data: lipCareStock },
-            { name: 'Hair Care', data: hairCareStock },
-            { name: 'Body Care', data: bodyCareStock },
-          ],
-          categories: plantNames,
+          series: seriesData,
+          categories: Object.keys(mallsData), // Malls as X-axis categories
         });
 
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching orders data:", error);
         setLoading(false);
       }
     };
 
-    fetchData();
+    fetchOrdersData();
   }, []);
 
   return (
@@ -132,7 +112,7 @@ const ChartTwo = () => {
       <div className="mb-4 justify-between gap-4 sm:flex">
         <div>
           <h4 className="text-xl font-semibold text-black dark:text-white">
-            Product Categories Stock by Plant
+            Product Category Sales by Mall
           </h4>
         </div>
       </div>
@@ -142,9 +122,9 @@ const ChartTwo = () => {
           <ReactApexChart
             options={{
               ...options,
-              xaxis: { ...options.xaxis, categories: state.categories },
+              xaxis: { ...options.xaxis, categories: state.categories }, // Mall names
             }}
-            series={state.series}
+            series={state.series} // Stock data for each category
             type="bar"
             height={350}
           />
