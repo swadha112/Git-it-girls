@@ -51,7 +51,7 @@ const connectDB = require("./config/db");
 const reviewAnalysisRoutes = require("./routes/reviewAnalysisRoutes");
 const mlRoutes = require("./routes/mlRoutes");
 const mallRoutes= require("./routes/mallRoutes");
-
+const graphRoutes=require("./routes/graphRoutes");
 
 
 
@@ -80,6 +80,7 @@ app.use("/api/review-analysis", reviewAnalysisRoutes);
 app.use("/api/ml", mlRoutes);
 app.use("/api/malls", mallRoutes);
 app.use('/api', emailRoutes);
+app.use("/api/graph",graphRoutes);
 // Health Check Route
 app.get("/", (req, res) => {
   res.send("API is running...");

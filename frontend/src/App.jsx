@@ -17,6 +17,7 @@ import Tables from './pages/Tables';
 import DefaultLayout from './layout/DefaultLayout';
 import Home from './pages/Home/Home1';
 import ReviewAnalysis from "../src/components/Tables/Suppliers";
+import GraphPage from './components/map';
 
 
 function App() {
@@ -119,7 +120,7 @@ function App() {
                 />
                 
                 <Route path="/review-analysis" element={<ReviewAnalysis />} />
-              
+                <Route path="/graph" element={<GraphPage />} />
 
                 <Route
                   path="/auth/signin"
