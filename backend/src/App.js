@@ -52,7 +52,7 @@ const reviewAnalysisRoutes = require("./routes/reviewAnalysisRoutes");
 const mlRoutes = require("./routes/mlRoutes");
 const mallRoutes= require("./routes/mallRoutes");
 const graphRoutes=require("./routes/graphRoutes");
-
+const analysisRoutes=require("./routes/analysisRoutes");
 
 
 dotenv.config(); 
@@ -81,6 +81,7 @@ app.use("/api/ml", mlRoutes);
 app.use("/api/malls", mallRoutes);
 app.use('/api', emailRoutes);
 app.use("/api/graph",graphRoutes);
+app.use("/api/analysis", analysisRoutes);
 // Health Check Route
 app.get("/", (req, res) => {
   res.send("API is running...");
