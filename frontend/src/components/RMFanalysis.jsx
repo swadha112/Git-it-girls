@@ -12,7 +12,7 @@ import {
   TableRow,
   CircularProgress,
 } from "@mui/material";
-
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 const RFMAnalysis = () => {
   const [rfmData, setRfmData] = useState({});
   const [currentTab, setCurrentTab] = useState(0);
@@ -44,6 +44,7 @@ const RFMAnalysis = () => {
     }
 
     return (
+      
       <Table>
         <TableHead>
           <TableRow>
@@ -77,10 +78,10 @@ const RFMAnalysis = () => {
   ];
 
   return (
+    <>
+      <Breadcrumb pageName="RMF Analysis" />
     <Box sx={{ padding: "20px" }}>
-      <Typography variant="h4" gutterBottom>
-        RFM Analysis
-      </Typography>
+      
       <Tabs
         value={currentTab}
         onChange={(e, newValue) => setCurrentTab(newValue)}
@@ -99,6 +100,7 @@ const RFMAnalysis = () => {
         )}
       </Box>
     </Box>
+    </>
   );
 };
 
