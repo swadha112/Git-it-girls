@@ -250,7 +250,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                       </clipPath>
                     </defs>
                   </svg>
-                  Road Map
+                  Expansion Guide
                 </NavLink>
               </li>
            {/* <!-- Menu Item Forms --> */}

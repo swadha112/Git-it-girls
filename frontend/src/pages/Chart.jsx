@@ -5,7 +5,7 @@ import TableFour from '../components/Tables/Logistics.jsx';
 const Chart = () => {
   return (
     <>
-      <Breadcrumb pageName="Logistics" />
+      <Breadcrumb pageName="Location Predictor" />
 
       <div className="flex flex-col gap-10">
         <TableFour />

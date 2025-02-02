@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import Tree from "react-d3-tree";
+import Breadcrumb from '../components/Breadcrumbs/Breadcrumb';
 
 const ProfitabilityAnalysis = () => {
   const [productNames, setProductNames] = useState([]);
@@ -33,6 +34,7 @@ const ProfitabilityAnalysis = () => {
     if (!data) return null;
 
     return {
+        
       name: "Locations",
       children: data.map((location) => ({
         name: location.location,
@@ -92,6 +94,8 @@ const ProfitabilityAnalysis = () => {
   };
 
   return (
+    <>
+    <Breadcrumb pageName="Expansion Guide" />
     <div style={{ padding: "20px" }}>
       <h1>Profitability Analysis</h1>
       <p>Select Inventory:</p>
@@ -145,6 +149,7 @@ const ProfitabilityAnalysis = () => {
         </div>
       )}
     </div>
+    </>
   );
 };
 
