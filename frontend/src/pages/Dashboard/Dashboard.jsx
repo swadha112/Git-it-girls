@@ -154,7 +154,7 @@ const ECommerce = () => {
         <ChartOne />
         <ChartTwo />
         <ChartThree />
-       <MapOne/>
+       
 
       </div>
     </>

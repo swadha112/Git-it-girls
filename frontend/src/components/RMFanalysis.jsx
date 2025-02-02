@@ -79,7 +79,7 @@ const RFMAnalysis = () => {
 
   return (
     <>
-      <Breadcrumb pageName="RMF Analysis" />
+      <Breadcrumb pageName="RFM Analysis" />
     <Box sx={{ padding: "20px" }}>
       
       <Tabs
