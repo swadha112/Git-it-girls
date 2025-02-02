@@ -8,55 +8,57 @@ import MapOne from '../../components/Maps/MapOne.jsx';
 import TableOne from '../../components/Tables/Orders.jsx';
 
 const ECommerce = () => {
-  const [inventoryData, setInventoryData] = useState([]);
-  const [ordersData, setOrdersData] = useState([]);
   const [totalInventory, setTotalInventory] = useState(0);
-  const [previousInventory, setPreviousInventory] = useState(0);
-  const [pendingOrders, setPendingOrders] = useState(0);
-  const [activeShipments, setActiveShipments] = useState(0);
+  const [mostPopularMall, setMostPopularMall] = useState("");
+  const [mostPopularProduct, setMostPopularProduct] = useState("");
+  const [averageReview, setAverageReview] = useState(0);
 
   useEffect(() => {
-    // Fetch inventory and orders data
-    const fetchData = async () => {
+    const fetchOrderData = async () => {
       try {
-        // Fetch inventory data from API
-        const inventoryResponse = await axios.get('https://supplychain-hyeo-apurvas-projects-a5f1cbec.vercel.app/api/inventory');
-        setInventoryData(inventoryResponse.data);
+        const response = await axios.get("http://localhost:5050/api/orders?all=true");
+        const orders = response.data.orders;
 
-        // Fetch orders data from API
-        const ordersResponse = await axios.get('https://supplychain-hyeo-apurvas-projects-a5f1cbec.vercel.app/api/orders');
-        setOrdersData(ordersResponse.data);
+        // Calculate total inventory
+        const totalInventory = orders.reduce((acc, order) => acc + order.quantity, 0);
+        setTotalInventory(totalInventory);
 
-        // Calculate total inventory (sum of stock across all products and plants)
-        const totalInventoryValue = inventoryResponse.data.reduce((total, plant) => {
-          return total + plant.products.reduce((sum, product) => sum + product.stock, 0);
-        }, 0);
-        setTotalInventory(totalInventoryValue);
+        // Calculate most popular mall
+        const mallPopularity = orders.reduce((acc, order) => {
+          acc[order.shopping_mall] = (acc[order.shopping_mall] || 0) + order.quantity;
+          return acc;
+        }, {});
+        const popularMall = Object.keys(mallPopularity).reduce((a, b) =>
+          mallPopularity[a] > mallPopularity[b] ? a : b
+        );
+        setMostPopularMall(popularMall);
 
-        // Calculate percent increase/decrease in total inventory
-        const inventoryChange = previousInventory !== 0 ? ((totalInventoryValue - previousInventory) / previousInventory) * 100 : 0;
-        setPreviousInventory(totalInventoryValue); // Store current value as the new previous for future calculations
+        // Calculate most popular product
+        const productPopularity = orders.reduce((acc, order) => {
+          acc[order.product_name] = (acc[order.product_name] || 0) + order.quantity;
+          return acc;
+        }, {});
+        const popularProduct = Object.keys(productPopularity).reduce((a, b) =>
+          productPopularity[a] > productPopularity[b] ? a : b
+        );
+        setMostPopularProduct(popularProduct);
 
-        // Calculate pending orders (orders with status 'Processing')
-        const pendingOrdersCount = ordersResponse.data.filter(order => order.status === 'Processing').length;
-        setPendingOrders(pendingOrdersCount);
-
-        // Calculate active shipments (orders with status 'Shipped')
-        const activeShipmentsCount = ordersResponse.data.filter(order => order.status === 'Shipped').length;
-        setActiveShipments(activeShipmentsCount);
+        // Calculate average review rating
+        const totalReviews = orders.reduce((acc, order) => acc + (order.review_rating || 0), 0);
+        const avgReview = orders.length ? (totalReviews / orders.length).toFixed(2) : 0;
+        setAverageReview(avgReview);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error("Error fetching orders data:", error);
       }
     };
 
-    fetchData();
-  }, [previousInventory]);
-
+    fetchOrderData();
+  }, []);
   return (
     <>
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6 xl:grid-cols-4 2xl:gap-7.5">
         {/* Total Inventory Card */}
-        <CardDataStats title="Total Inventory" total={totalInventory} rate={`${previousInventory !== 0 ? ((totalInventory - previousInventory) / previousInventory * 100).toFixed(2) : 0}%`} levelUp={totalInventory >= previousInventory}>
+        <CardDataStats title="Total Inventory" total={totalInventory} >
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -77,7 +79,7 @@ const ECommerce = () => {
         </CardDataStats>
 
         {/* Pending Orders Card */}
-        <CardDataStats title="Pending Orders" total={pendingOrders} rate={pendingOrders} levelUp>
+        <CardDataStats title="Popular Shoppping Mall" total={mostPopularMall} levelUp>
           <svg
             className="fill-primary dark:fill-white"
             width="20"
@@ -102,7 +104,7 @@ const ECommerce = () => {
         </CardDataStats>
 
         {/* Active Shipments Card */}
-        <CardDataStats title="Active Shipments" total={activeShipments} rate={`${activeShipments} Arriving`} levelUp>
+        <CardDataStats title="Popular Products" total={mostPopularProduct} levelUp>
           <svg
             className="fill-primary dark:fill-white"
             width="22"
@@ -123,7 +125,7 @@ const ECommerce = () => {
         </CardDataStats>
 
         {/* Supplier Performance Card (dummy example) */}
-        <CardDataStats title="Supplier Performance" total="92%" rate="0.95%" levelDown>
+        <CardDataStats title="Average Review" total={averageReview} levelDown>
           <svg
             className="fill-primary dark:fill-white"
             width="22"

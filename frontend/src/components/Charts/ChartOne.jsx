@@ -8,11 +8,11 @@ const options = {
     position: 'top',
     horizontalAlign: 'left',
   },
-  colors: ['#3C50E0', '#89ff76'],
+  colors: ['#3C50E0'],
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     height: 335,
-    type: 'area',
+    type: 'bar',
     dropShadow: {
       enabled: true,
       color: '#623CEA14',
@@ -43,10 +43,6 @@ const options = {
       },
     },
   ],
-  stroke: {
-    width: [2, 2],
-    curve: 'straight',
-  },
   grid: {
     xaxis: {
       lines: {
@@ -62,23 +58,9 @@ const options = {
   dataLabels: {
     enabled: false,
   },
-  markers: {
-    size: 4,
-    colors: '#fff',
-    strokeColors: ['#3056D3', '#89ff76'],
-    strokeWidth: 3,
-    strokeOpacity: 0.9,
-    strokeDashArray: 0,
-    fillOpacity: 1,
-    discrete: [],
-    hover: {
-      size: undefined,
-      sizeOffset: 5,
-    },
-  },
   xaxis: {
     type: 'category',
-    categories: [], // This will be updated dynamically
+    categories: [], // To be dynamically populated
     axisBorder: {
       show: false,
     },
@@ -88,7 +70,9 @@ const options = {
   },
   yaxis: {
     min: 0,
-    max: 100,
+    title: {
+      text: 'Number of Orders',
+    },
   },
 };
 
@@ -96,97 +80,61 @@ const ChartOne = () => {
   const [state, setState] = useState({
     series: [
       {
-        name: 'In Stock',
-        data: [],
-      },
-      {
-        name: 'Reorder Level',
+        name: 'Number of Orders',
         data: [],
       },
     ],
     categories: [],
   });
 
-  const [selectedPlant, setSelectedPlant] = useState('New York');
-  const [plants] = useState(['New York', 'Los Angeles', 'Chicago', 'Houston', 'Phoenix']);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchInventoryData = async () => {
+    const fetchOrderData = async () => {
       try {
-        const response = await axios.get('https://supplychain-hyeo-apurvas-projects-a5f1cbec.vercel.app/api/inventory');
-        const inventory = response.data;
+        const response = await axios.get('http://localhost:5050/api/orders?all=true');
+        const orders = response.data.orders;
 
-        const plantData = inventory.find((plant) => plant.plant_name === selectedPlant);
+        // Aggregate order count by location
+        const locationData = {};
+        orders.forEach((order) => {
+          const location = order.shopping_mall;
+          if (locationData[location]) {
+            locationData[location]++;
+          } else {
+            locationData[location] = 1;
+          }
+        });
 
-        if (plantData && plantData.products) {
-          const productNames = plantData.products.map((product) => product.product_name);
-          const stockLevels = plantData.products.map((product) => product.stock);
-          const reorderLevels = plantData.products.map((product) => product.reorder_level);
+        // Extract locations and their order counts
+        const categories = Object.keys(locationData); // Locations
+        const orderCounts = Object.values(locationData); // Number of orders per location
 
-          setState({
-            series: [
-              { name: 'In Stock', data: stockLevels },
-              { name: 'Reorder Level', data: reorderLevels },
-            ],
-            categories: productNames,
-          });
-        } else {
-          console.warn('No products found for selected plant');
-        }
+        setState({
+          series: [
+            {
+              name: 'Number of Orders',
+              data: orderCounts,
+            },
+          ],
+          categories,
+        });
 
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching inventory data:', error);
+        console.error('Error fetching order data:', error);
         setLoading(false);
       }
     };
 
-    fetchInventoryData();
-  }, [selectedPlant]);
-
-  const handlePlantChange = (plant) => {
-    setSelectedPlant(plant);
-  };
+    fetchOrderData();
+  }, []);
 
   return (
     <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
       <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
-        <div className="flex w-full flex-wrap gap-3 sm:gap-3">
-          <div className="flex min-w-[120px]">
-            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-primary">In Stock</p>
-            </div>
-          </div>
-          <div className="flex min-w-[220px]">
-            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-brightgreen">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-brightgreen"></span>
-            </span>
-            <div className="w-full">
-              <p className="font-semibold text-brightgreen">Reorder Level</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="flex w-full mt-5 sm:mt-0 sm:w-auto justify-center flex-wrap gap-2">
-          <div className="inline-flex items-center rounded-md bg-white p-1.5 dark:bg-meta-4 flex-wrap">
-            {plants.map((plant) => (
-              <button
-                key={plant}
-                onClick={() => handlePlantChange(plant)}
-                className={`rounded py-2 px-4 text-xs font-medium text-center mx-1 mb-2 sm:mb-0 w-full sm:w-28 transition-colors ${
-                  selectedPlant === plant
-                    ? 'bg-primary text-white'
-                    : 'bg-white text-black hover:bg-primary hover:text-white'
-                } shadow-card dark:bg-boxdark dark:text-white dark:hover:bg-green dark:hover:text-black`}
-              >
-                {plant}
-              </button>
-            ))}
-          </div>
+        <div>
+          <p className="font-semibold text-primary">Orders by Location</p>
         </div>
       </div>
 
@@ -196,7 +144,7 @@ const ChartOne = () => {
             <ReactApexChart
               options={{ ...options, xaxis: { ...options.xaxis, categories: state.categories } }}
               series={state.series}
-              type="line"
+              type="bar"
               height={window.innerWidth < 768 ? 250 : 350} // Adjust chart height based on screen width
             />
           ) : (

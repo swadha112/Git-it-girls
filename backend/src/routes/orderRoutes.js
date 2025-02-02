@@ -64,22 +64,27 @@ router.post("/create", async (req, res) => {
 
 // ✅ Route: Get all orders with pagination
 router.get("/", async (req, res) => {
-  console.log("GET /orders endpoint hit"); // Debugging
-
   try {
-    const limit = parseInt(req.query.limit) || 100; // Default to 100 records
-    const skip = parseInt(req.query.skip) || 0;
+    const { all } = req.query; // Check for the `all=true` parameter
+    let orders;
 
-    console.log(`Fetching orders with limit: ${limit}, skip: ${skip}`);
-    const orders = await Order.find().limit(limit).skip(skip);
-    const totalOrders = await Order.countDocuments();
+    if (all === "true") {
+      // Fetch all records without any limits
+      orders = await Order.find();
+    } else {
+      // Apply default pagination
+      const limit = parseInt(req.query.limit) || 100; // Default to 100 records
+      const skip = parseInt(req.query.skip) || 0;
+      orders = await Order.find().limit(limit).skip(skip);
+    }
 
-    res.status(200).json({ orders, total: totalOrders });
+    res.status(200).json({ orders, total: await Order.countDocuments() });
   } catch (error) {
     console.error("Error fetching orders:", error);
     res.status(500).json({ message: "Error fetching orders", error });
   }
 });
+
 router.get("/feature-options", async (req, res) => {
   try {
     const productNames = await Order.distinct("product_name");
